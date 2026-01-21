@@ -1,6 +1,6 @@
 
 
-```md
+
 # REST API для сервісу типу MyAnimeList / Shikimori
 
 Проєкт реалізований на **Node.js з використанням TypeScript**  

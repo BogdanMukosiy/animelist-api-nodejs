@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model Anime {
+  id        String   @id @default(cuid())
+  title     String
+  status    String
+  year      Int?
+  createdAt DateTime @default(now())
+
+  reviews   Review[]
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  animeId  String
+  rating   Int
+  text     String
+  createdAt DateTime @default(now())
+
+  anime Anime @relation(fields: [animeId], references: [id])
+}

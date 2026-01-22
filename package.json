@@ -7,7 +7,12 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "test": "jest --runInBand",
+    "test:unit": "jest --runInBand tests/unit",
+    "test:integration": "jest --runInBand tests/integration",
+    "test:e2e": "jest --runInBand tests/e2e",
+    "test:mutation": "stryker run"
   },
   "repository": {
     "type": "git",
@@ -22,18 +27,31 @@
   },
   "homepage": "https://github.com/BogdanMukosiy/animelist-api-nodejs#readme",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "^7.2.0",
     "dotenv": "^17.2.3",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pg": "^8.17.2"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^9.4.0",
+    "@stryker-mutator/jest-runner": "^9.4.0",
+    "@stryker-mutator/typescript-checker": "^9.4.0",
     "@types/express": "^5.0.6",
-    "@types/node": "^25.0.9",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.0.10",
+    "@types/pg": "^8.16.0",
+    "@types/supertest": "^6.0.3",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "husky": "^9.1.7",
+    "jest": "^30.2.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.0",
+    "prisma": "^7.2.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
   }

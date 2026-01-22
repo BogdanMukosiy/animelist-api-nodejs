@@ -1,3 +1,20 @@
 node_modules
 dist
 .env
+/src/generated/prisma
+
+# mutation / coverage
+reports
+coverage
+
+# prisma build artifacts
+prisma.config.js
+prisma.config.js.map
+
+# OS / IDE
+.DS_Store
+.idea
+.vscode
+
+# logs
+*.log

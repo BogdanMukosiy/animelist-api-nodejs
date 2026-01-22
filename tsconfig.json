@@ -13,6 +13,9 @@
     "skipLibCheck": true,
     "sourceMap": true,
 
-    "types": ["node"]
-  }
+    "types": ["node", "express", "jest"],
+
+  },
+  "include": ["src/**/*"],
+  "exclude": ["tests/**/*", "prisma.config.ts", "node_modules", "dist"]
 }

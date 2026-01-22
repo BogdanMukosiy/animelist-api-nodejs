@@ -1,98 +1,116 @@
+import { prisma } from '../../config/prisma';
 import { ApiError } from '../../common/errors/ApiError';
-import { animeStore } from './anime.store';
-import { Anime, CreateAnimeDto, UpdateAnimeDto } from './anime.types';
-import { newId } from '../../common/utils/id';
 
-const now = () => new Date().toISOString();
+/** Максимальний ліміт, щоб не можна було "вбити" сервер */
+const MAX_LIMIT = 50;
 
-export function listAnime(params: {
-    q?: string;
-    status?: string;
-    year?: string;
-    sort?: string;
-    page?: string;
-    limit?: string;
-}) {
-    let items = [...animeStore];
-
-    if (params.q) {
-        const q = params.q.toLowerCase();
-        items = items.filter(a => a.title.toLowerCase().includes(q));
-    }
-
-    if (params.status) {
-        items = items.filter(a => a.status === params.status);
-    }
-
-    if (params.year) {
-        const y = Number(params.year);
-        if (!Number.isNaN(y)) items = items.filter(a => a.year === y);
-    }
-
-    if (params.sort === 'year') items.sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
-    if (params.sort === 'title') items.sort((a, b) => a.title.localeCompare(b.title));
-
-    const page = Math.max(1, Number(params.page ?? 1) || 1);
-    const limit = Math.min(100, Math.max(1, Number(params.limit ?? 20) || 20));
-
-    const total = items.length;
-    const start = (page - 1) * limit;
-
-    return {
-        items: items.slice(start, start + limit),
-        page,
-        limit,
-        total
-    };
+function normalizePagination(query: any) {
+    const page = Math.max(Number(query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(query.limit) || 10, 1), MAX_LIMIT);
+    return { page, limit };
 }
 
-export function getAnime(id: string): Anime {
-    console.log('[getAnime] id =', id, 'all ids=', animeStore.map(a => a.id));
-    const item = animeStore.find(a => a.id === id);
-    if (!item) throw ApiError.notFound('Anime not found');
-    return item;
+export async function listAnime(query: any) {
+    const { page, limit } = normalizePagination(query);
+
+    const where: any = {};
+
+    if (query.status) where.status = String(query.status);
+    if (query.year !== undefined) {
+        const year = Number(query.year);
+        if (Number.isNaN(year)) throw ApiError.badRequest('year must be a number');
+        where.year = year;
+    }
+
+    if (query.q) {
+        where.title = {
+            contains: String(query.q),
+            mode: 'insensitive',
+        };
+    }
+
+    const [items, total] = await Promise.all([
+        prisma.anime.findMany({
+            where,
+            skip: (page - 1) * limit,
+            take: limit,
+            // orderBy: { createdAt: 'desc' }, // увімкни якщо є поле createdAt в схемі
+        }),
+        prisma.anime.count({ where }),
+    ]);
+
+    return { items, page, limit, total };
 }
 
-export function createAnime(dto: CreateAnimeDto): Anime {
-    const details = [];
-
-    if (!dto.title || dto.title.trim().length === 0) {
-        details.push({ field: 'title', issue: 'required' });
-    }
-    if (!dto.status || (dto.status !== 'ongoing' && dto.status !== 'finished')) {
-        details.push({ field: 'status', issue: 'must be ongoing|finished' });
-    }
-    if (dto.year !== undefined && (typeof dto.year !== 'number' || dto.year < 1900 || dto.year > 2100)) {
-        details.push({ field: 'year', issue: 'must be between 1900 and 2100' });
-    }
-    if (details.length) throw ApiError.validation('Validation failed', details);
-
-    const item: Anime = {
-        id: newId(),
-        createdAt: now(),
-        ...dto,
-        title: dto.title.trim()
-    };
-
-    animeStore.push(item);
-    return item;
+export async function getAnime(id: string) {
+    const anime = await prisma.anime.findUnique({ where: { id } });
+    if (!anime) throw ApiError.notFound('Anime not found');
+    return anime;
 }
 
-export function updateAnime(id: string, dto: UpdateAnimeDto): Anime {
-    const item = getAnime(id);
+export async function createAnime(data: any) {
+    const title = String(data?.title ?? '').trim();
+    const status = String(data?.status ?? '').trim();
+    const yearRaw = data?.year;
 
-    if (dto.status && dto.status !== 'ongoing' && dto.status !== 'finished') {
-        throw ApiError.validation('Validation failed', [{ field: 'status', issue: 'must be ongoing|finished' }]);
+    if (!title) throw ApiError.badRequest('title is required');
+    if (!status) throw ApiError.badRequest('status is required');
+
+    let year: number | null = null;
+    if (yearRaw !== undefined && yearRaw !== null && yearRaw !== '') {
+        const y = Number(yearRaw);
+        if (Number.isNaN(y)) throw ApiError.badRequest('year must be a number');
+        year = y;
     }
 
-    Object.assign(item, dto);
-    if (dto.title !== undefined) item.title = dto.title.trim();
-
-    return item;
+    return prisma.anime.create({
+        data: {
+            title,
+            status,
+            year,
+        },
+    });
 }
 
-export function deleteAnime(id: string): void {
-    const idx = animeStore.findIndex(a => a.id === id);
-    if (idx === -1) throw ApiError.notFound('Anime not found');
-    animeStore.splice(idx, 1);
+export async function updateAnime(id: string, data: any) {
+    await getAnime(id);
+
+    const updateData: any = {};
+
+    if (data?.title !== undefined) {
+        const title = String(data.title).trim();
+        if (!title) throw ApiError.badRequest('title cannot be empty');
+        updateData.title = title;
+    }
+
+    if (data?.status !== undefined) {
+        const status = String(data.status).trim();
+        if (!status) throw ApiError.badRequest('status cannot be empty');
+        updateData.status = status;
+    }
+
+    if (data?.year !== undefined) {
+        if (data.year === null || data.year === '') {
+            updateData.year = null;
+        } else {
+            const year = Number(data.year);
+            if (Number.isNaN(year)) throw ApiError.badRequest('year must be a number');
+            updateData.year = year;
+        }
+    }
+
+    // якщо нічого не передали на оновлення
+    if (Object.keys(updateData).length === 0) {
+        throw ApiError.badRequest('No fields to update');
+    }
+
+    return prisma.anime.update({
+        where: { id },
+        data: updateData,
+    });
+}
+
+export async function deleteAnime(id: string) {
+    await getAnime(id);
+    return prisma.anime.delete({ where: { id } });
 }

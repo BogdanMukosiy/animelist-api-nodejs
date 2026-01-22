@@ -1,24 +1,25 @@
-import { Request, Response } from 'express';
+import type { RequestHandler } from 'express';
+import { asyncHandler } from '../../common/utils/asyncHandler';
 import * as service from './list.service';
 
 type ParamsEntryId = { entryId: string };
 
-export function getMyList(req: Request, res: Response) {
-    const data = service.getMyList(req.query as any);
+export const getMyList: RequestHandler = asyncHandler(async (req, res) => {
+    const data = await service.getMyList();
     res.json(data);
-}
+});
 
-export function add(req: Request, res: Response) {
-    const entry = service.addToMyList(req.body);
+export const add: RequestHandler = asyncHandler(async (req, res) => {
+    const entry = await service.addToMyList(req.body);
     res.status(201).json(entry);
-}
+});
 
-export function patch(req: Request<ParamsEntryId>, res: Response) {
-    const entry = service.updateMyEntry(req.params.entryId, req.body);
-    res.json({ id: entry.id, message: 'List entry updated' });
-}
+export const patch: RequestHandler<ParamsEntryId> = asyncHandler(async (req, res) => {
+    const entry = await service.updateMyEntry(req.params.entryId, req.body);
+    res.json(entry); // повертаємо оновлений запис
+});
 
-export function remove(req: Request<ParamsEntryId>, res: Response) {
-    service.removeMyEntry(req.params.entryId);
+export const remove: RequestHandler<ParamsEntryId> = asyncHandler(async (req, res) => {
+    await service.removeMyEntry(req.params.entryId);
     res.status(204).send();
-}
+});

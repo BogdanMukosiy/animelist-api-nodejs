@@ -6,6 +6,13 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id        String   @id
+  createdAt DateTime @default(now())
+
+  reviews Review[]
+  list    UserAnimeEntry[]
+}
 
 model Anime {
   id        String   @id @default(cuid())
@@ -14,15 +21,35 @@ model Anime {
   year      Int?
   createdAt DateTime @default(now())
 
-  reviews   Review[]
+  reviews Review[]
+  list    UserAnimeEntry[]
 }
 
 model Review {
   id        String   @id @default(cuid())
-  animeId  String
-  rating   Int
-  text     String
+  animeId   String
+  userId    String
+  rating    Int
+  text      String
   createdAt DateTime @default(now())
 
-  anime Anime @relation(fields: [animeId], references: [id])
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([animeId, userId])
+}
+
+model UserAnimeEntry {
+  id              String   @id @default(cuid())
+  userId          String
+  animeId         String
+  status          String
+  episodesWatched Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime Anime @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
 }

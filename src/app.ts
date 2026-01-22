@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'OK', message: 'Animelist API is running' });
+  res.status(200).json({ status: 'OK', message: 'Animelist API is running' });
 });
 
 // Anime

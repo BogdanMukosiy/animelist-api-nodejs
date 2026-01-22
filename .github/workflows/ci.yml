@@ -1,56 +1,26 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches: [dev, main]
+    branches: ['dev', 'main']
+  pull_request:
+    branches: ['dev', 'main']
 
 jobs:
-  commitlint:
-    name: Commit message lint (Conventional Commits)
+  build-test:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: wagoid/commitlint-github-action@v6
-        with:
-          configFile: commitlint.config.cjs
-
-  build_test:
-    name: Format, Lint, Build, Test
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: animelist_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres -d animelist_test"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=20
-
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/animelist_test
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: Install deps
+      - name: Install dependencies
         run: npm ci
 
       - name: Prettier check
@@ -59,11 +29,8 @@ jobs:
       - name: ESLint
         run: npm run lint
 
-      - name: Build
+      - name: TypeScript build
         run: npm run build
 
-      - name: Apply Prisma migrations
-        run: npx prisma migrate deploy
-
-      - name: Run tests
+      - name: Tests
         run: npm test

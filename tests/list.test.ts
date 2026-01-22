@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../src/app';
 import { prisma } from '../src/config/prisma';
-import {cleanupDb, closeDb} from './testUtils';
+import { cleanupDb, closeDb } from './testUtils';
 
 describe('My List API', () => {
     let animeId: string;
@@ -22,12 +22,8 @@ describe('My List API', () => {
         await closeDb();
     });
 
-
-
     it('POST /me/list should add entry', async () => {
-        const res = await request(app)
-            .post('/me/list')
-            .send({ animeId, status: 'planned' });
+        const res = await request(app).post('/me/list').send({ animeId, status: 'planned' });
 
         expect(res.status).toBe(201);
         expect(res.body.id).toBeDefined();

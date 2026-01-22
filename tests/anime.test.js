@@ -1,12 +1,14 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const supertest_1 = __importDefault(require("supertest"));
-const app_1 = __importDefault(require("../src/app"));
-const prisma_1 = require("../src/config/prisma");
-const testUtils_1 = require("./testUtils");
+'use strict';
+var __importDefault =
+    (this && this.__importDefault) ||
+    function (mod) {
+        return mod && mod.__esModule ? mod : { default: mod };
+    };
+Object.defineProperty(exports, '__esModule', { value: true });
+const supertest_1 = __importDefault(require('supertest'));
+const app_1 = __importDefault(require('../src/app'));
+const prisma_1 = require('../src/config/prisma');
+const testUtils_1 = require('./testUtils');
 describe('Anime API', () => {
     beforeAll(async () => {
         await (0, testUtils_1.cleanupDb)();

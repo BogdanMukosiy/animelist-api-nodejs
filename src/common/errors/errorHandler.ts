@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { ApiError } from './ApiError';
 
 function mapPrismaError(err: any): ApiError | null {
@@ -21,6 +21,7 @@ function mapPrismaError(err: any): ApiError | null {
     return null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction) {
     if (err instanceof ApiError) {
         return res.status(err.status).json({

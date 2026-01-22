@@ -4,13 +4,7 @@ import type { CreateEntryDto, ListStatus, UpdateEntryDto } from './list.types';
 
 const DEMO_USER_ID = 'demo-user';
 
-const ALLOWED_STATUSES: ListStatus[] = [
-    'planned',
-    'watching',
-    'completed',
-    'dropped',
-    'on_hold',
-];
+const ALLOWED_STATUSES: ListStatus[] = ['planned', 'watching', 'completed', 'dropped', 'on_hold'];
 
 function isValidStatus(value: any): value is ListStatus {
     return ALLOWED_STATUSES.includes(value);

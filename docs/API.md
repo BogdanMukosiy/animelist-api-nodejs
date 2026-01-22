@@ -16,11 +16,13 @@ Base URL: http://localhost:3000
 Версія: v1
 
 ## Загальні правила
+
 ### 1.1. Формат відповідей
 
 Всі відповіді API повертаються у форматі JSON.
 
 ### 1.2. Формат помилок
+
 ```
 {
 "error": "validation_error",
@@ -33,7 +35,9 @@ Base URL: http://localhost:3000
 ]
 }
 ```
+
 ### 1.3. HTTP статуси
+
 | Код | Опис                      |
 | --- | ------------------------- |
 | 200 | Успішний запит            |
@@ -45,18 +49,24 @@ Base URL: http://localhost:3000
 | 500 | Внутрішня помилка сервера |
 
 ## Health Check
+
 ### 2.1 Перевірка роботи сервера
+
 ```
 GET /health
 ```
+
 Response
+
 ```
 {
   "status": "OK",
   "message": "Animelist API is running"
 }
 ```
+
 ## 3. Aніме
+
 ### 3.1 Отримати список аніме
 
 Query parameters:
@@ -69,6 +79,7 @@ Query parameters:
 | year   | number | рік                   |
 | status | string | ongoing / finished    |
 | sort   | string | rating / year / title |
+
 ```
 GET /anime
 ```
@@ -91,10 +102,13 @@ GET /anime
   "total": 1
 }
 ```
+
 ## 3.2 Отримати аніме за ID
+
 ```
 GET /anime/:id
 ```
+
 ```
 {
   "id": "uuid",
@@ -109,17 +123,22 @@ GET /anime/:id
   "posterUrl": "https://..."
 }
 ```
+
 ### 3.3 Створити аніме
+
 ```
 POST /anime
 ```
+
 Response 201
+
 ```
 {
   "id": "uuid",
   "message": "Anime created"
 }
 ```
+
 ```
 {
   "title": "Naruto",
@@ -133,18 +152,24 @@ Response 201
   "posterUrl": "https://..."
 }
 ```
+
 ### 3.4 Оновити аніме
+
 ```
 PATCH /anime/:id
 ```
+
 Response 201
+
 ```
 {
   "synopsis": "Updated description",
   "posterUrl": "https://new-image"
 }
 ```
+
 3.5 Видалити аніме
+
 ```
 DELETE /anime/:id
 ```
@@ -152,10 +177,13 @@ DELETE /anime/:id
 Response 204
 
 ### 4.Reviews
+
 ## 4.1 Отримати відгуки до аніме
+
 ```
 GET /anime/:id/reviews
 ```
+
 ```
 {
 "items": [
@@ -169,23 +197,30 @@ GET /anime/:id/reviews
 ]
 }
 ```
+
 ### 4.2 Додати відгук
+
 ```
 POST /anime/:id/reviews
 ```
+
 ```
 {
 "rating": 9,
 "text": "Great anime!"
 }
 ```
+
 Один користувач може залишити лише один відгук для одного аніме.
 
 ## 5. User Anime List (My List)
+
 ### 5.1 Отримати список користувача
+
 ```
 GET /me/list
 ```
+
 ```
 {
   "items": [
@@ -199,20 +234,26 @@ GET /me/list
   ]
 }
 ```
+
 ### 5.2 Додати аніме до списку
+
 ```
 POST /me/list
 ```
+
 ```
 {
   "animeId": "uuid",
   "status": "planned"
 }
 ```
+
 ### 5.3 Оновити запис
+
 ```
 PATCH /me/list/:entryId
 ```
+
 ```
 {
 "status": "completed",
@@ -220,11 +261,15 @@ PATCH /me/list/:entryId
 "episodesWatched": 24
 }
 ```
+
 ### 5.4 Видалити зі списку
+
 ```
 DELETE /me/list/:entryId
 ```
+
 ## 6. Статуси
+
 ### Статус аніме
 
 ongoing
@@ -242,6 +287,7 @@ completed
 dropped
 
 on_hold
+
 ## 7. Примітки
 
 API реалізовано для навчальних цілей.

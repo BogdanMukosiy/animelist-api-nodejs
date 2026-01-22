@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../src/app';
 import { prisma } from '../src/config/prisma';
-import {cleanupDb, closeDb} from './testUtils';
+import { cleanupDb, closeDb } from './testUtils';
 
 describe('Reviews API', () => {
     let animeId: string;
@@ -20,8 +20,6 @@ describe('Reviews API', () => {
         await cleanupDb();
         await closeDb();
     });
-
-
 
     it('POST /anime/:id/reviews should create review', async () => {
         const res = await request(app)

@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../src/app';
 import { prisma } from '../src/config/prisma';
-import {cleanupDb, closeDb} from './testUtils';
+import { cleanupDb, closeDb } from './testUtils';
 
 describe('Anime API', () => {
     beforeAll(async () => {
@@ -12,8 +12,6 @@ describe('Anime API', () => {
         await cleanupDb();
         await closeDb();
     });
-
-
 
     it('POST /anime should create anime', async () => {
         const res = await request(app)
@@ -47,9 +45,7 @@ describe('Anime API', () => {
             data: { title: 'One Piece', status: 'ongoing', year: 1999 },
         });
 
-        const res = await request(app)
-            .patch(`/anime/${created.id}`)
-            .send({ status: 'finished' });
+        const res = await request(app).patch(`/anime/${created.id}`).send({ status: 'finished' });
 
         expect(res.status).toBe(200);
         expect(res.body.status).toBe('finished');

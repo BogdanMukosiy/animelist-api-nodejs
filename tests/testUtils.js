@@ -1,8 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.cleanupDb = cleanupDb;
 exports.closeDb = closeDb;
-const prisma_1 = require("../src/config/prisma");
+const prisma_1 = require('../src/config/prisma');
 async function cleanupDb() {
     await prisma_1.prisma.review.deleteMany({});
     await prisma_1.prisma.userAnimeEntry.deleteMany({});

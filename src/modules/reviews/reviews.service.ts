@@ -1,48 +1,70 @@
+import { prisma } from '../../config/prisma';
 import { ApiError } from '../../common/errors/ApiError';
-import { reviewStore } from './reviews.store';
-import { CreateReviewDto, Review } from './reviews.types';
-import { newId } from '../../common/utils/id';
-import { getAnime } from '../anime/anime.service';
+import type { CreateReviewDto } from './reviews.types';
 
-const now = () => new Date().toISOString();
-const DEMO_USER_ID = 'user-1'; // для ЛР3 спрощено
+const DEMO_USER_ID = 'demo-user';
 
-export function listReviewsByAnime(animeId: string) {
-    // переконаємось, що аніме існує
-    getAnime(animeId);
-
-    const items = reviewStore.filter(r => r.animeId === animeId);
-    return { items, total: items.length };
+async function ensureDemoUser() {
+    await prisma.user.upsert({
+        where: { id: DEMO_USER_ID },
+        update: {},
+        create: { id: DEMO_USER_ID },
+    });
 }
 
+function normalizeRating(value: any) {
+    const rating = Number(value);
+    if (Number.isNaN(rating)) throw ApiError.badRequest('rating must be a number');
+    if (rating < 1 || rating > 10) throw ApiError.badRequest('rating must be between 1 and 10');
+    return rating;
+}
 
-export function createReview(animeId: string, dto: CreateReviewDto): Review {
-    console.log('[createReview] animeId =', animeId);
+function normalizeText(value: any) {
+    const text = String(value ?? '').trim();
+    if (!text) throw ApiError.badRequest('text is required');
+    if (text.length > 2000) throw ApiError.badRequest('text is too long (max 2000 chars)');
+    return text;
+}
 
-    getAnime(animeId);
+export async function listReviewsByAnime(animeId: string) {
+    const id = String(animeId ?? '').trim();
+    if (!id) throw ApiError.badRequest('animeId is required');
 
-    const details = [];
-    if (typeof dto.rating !== 'number' || dto.rating < 1 || dto.rating > 10) {
-        details.push({ field: 'rating', issue: 'must be 1..10' });
-    }
-    if (!dto.text || dto.text.trim().length === 0) {
-        details.push({ field: 'text', issue: 'required' });
-    }
-    if (details.length) throw ApiError.validation('Validation failed', details);
+    const anime = await prisma.anime.findUnique({ where: { id } });
+    if (!anime) throw ApiError.notFound('Anime not found');
 
-    // правило: 1 user -> 1 review на 1 anime
-    const exists = reviewStore.find(r => r.animeId === animeId && r.userId === DEMO_USER_ID);
-    if (exists) throw ApiError.conflict('Review already exists for this anime by this user');
+    return prisma.review.findMany({
+        where: { animeId: id },
+        orderBy: { createdAt: 'desc' },
+    });
+}
 
-    const item: Review = {
-        id: newId(),
-        animeId,
-        userId: DEMO_USER_ID,
-        rating: dto.rating,
-        text: dto.text.trim(),
-        createdAt: now()
-    };
+export async function createReview(animeId: string, data: CreateReviewDto) {
+    const id = String(animeId ?? '').trim();
+    if (!id) throw ApiError.badRequest('animeId is required');
 
-    reviewStore.push(item);
-    return item;
+    const anime = await prisma.anime.findUnique({ where: { id } });
+    if (!anime) throw ApiError.notFound('Anime not found');
+
+    // ✅ ключовий фікс P2003
+    await ensureDemoUser();
+
+    const rating = normalizeRating((data as any)?.rating);
+    const text = normalizeText((data as any)?.text);
+
+    // ✅ 1 review на 1 anime (для demo-user)
+    const existing = await prisma.review.findFirst({
+        where: { animeId: id, userId: DEMO_USER_ID },
+    });
+
+    if (existing) throw ApiError.conflict('You already left a review for this anime');
+
+    return prisma.review.create({
+        data: {
+            animeId: id,
+            userId: DEMO_USER_ID,
+            rating,
+            text,
+        },
+    });
 }

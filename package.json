@@ -5,48 +5,50 @@
   "type": "commonjs",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "npx prisma generate && tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "jest --runInBand",
-    "test:detect": "jest --detectOpenHandles --runInBand",
+    "test": "npx prisma generate && jest --runInBand",
+    "test:detect": "npx prisma generate && jest --detectOpenHandles --runInBand",
     "test:mutation": "stryker run",
     "loadtest": "node scripts/loadtest.js",
-    "prepare": "husky"
+    "prepare": "husky install"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.3.0",
-    "@prisma/client": "^7.3.0",
+    "@prisma/client": "^7.2.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "pg": "^8.17.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.3.1",
     "@commitlint/config-conventional": "^20.3.1",
     "@stryker-mutator/core": "^9.4.0",
     "@stryker-mutator/jest-runner": "^9.4.0",
     "@stryker-mutator/typescript-checker": "^9.4.0",
     "@types/express": "^5.0.6",
-    "@types/jest": "^29.5.14",
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.0.10",
     "@types/pg": "^8.16.0",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.53.1",
     "@typescript-eslint/parser": "^8.53.1",
     "autocannon": "^8.0.0",
-    "eslint": "^8.57.0",
+    "commitlint": "^20.3.1",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "husky": "^9.1.7",
-    "jest": "^29.7.0",
+    "jest": "^30.2.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.0",
-    "prisma": "^7.3.0",
+    "prisma": "^7.2.0",
+    "stryker": "^1.0.1",
+    "stryker-jest-runner": "^1.4.1",
     "supertest": "^7.2.2",
-    "ts-jest": "^29.2.5",
+    "ts-jest": "^29.4.6",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
   },
@@ -54,7 +56,7 @@
     "*.{ts,js,json,md}": [
       "prettier --write"
     ],
-    "*.ts": [
+    "*.{ts}": [
       "eslint --fix"
     ]
   }

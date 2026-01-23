@@ -1,14 +1,15 @@
-import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
+import dotenv from 'dotenv';
 import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '@prisma/client';
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error('DATABASE_URL is missing in .env');
-}
+dotenv.config();
 
-export const pool = new Pool({ connectionString });
+export const DATABASE_URL =
+  process.env.DATABASE_URL ??
+  'postgresql://postgres:postgres@localhost:5432/animelist?schema=public';
+
+export const pool = new Pool({ connectionString: DATABASE_URL });
 
 const adapter = new PrismaPg(pool);
 

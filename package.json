@@ -5,13 +5,14 @@
   "type": "commonjs",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "npx prisma generate && tsc -p tsconfig.json",
+    "postinstall": "prisma generate",
+    "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npx prisma generate && jest --runInBand",
-    "test:detect": "npx prisma generate && jest --detectOpenHandles --runInBand",
+    "test": "jest --runInBand",
+    "test:detect": "jest --detectOpenHandles --runInBand",
     "test:mutation": "stryker run",
     "loadtest": "node scripts/loadtest.js",
     "prepare": "husky install"
